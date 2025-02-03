@@ -10,11 +10,21 @@ import json
 import pandas as pd
 
 from app import app
+from sql_beta import df_adv, df_proc
 
 col_centered_style={'display': 'flex', 'justify-content': 'center'}
 
 # ========= Layout ========= #
-layout = dbc.Modal([])
+layout = dbc.Modal([
+    dbc.ModalHeader(dbc.ModalTitle("Adicione um Processo")),
+    dbc.ModalBody([
+        dbc.Row([
+            dbc.Col([
+                
+            ]),
+        ])
+    ])
+])
 
 
 

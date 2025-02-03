@@ -7,6 +7,7 @@ import sqlite3
 # import from folders
 from app import *
 from components import home, sidebar
+from sql_beta import df_adv, df_proc
 
 # Criar estrutura para Store intermediária ==============
 
@@ -17,8 +18,8 @@ app.layout = dbc.Container([
     # Store e Location 
     dcc.Location(id='url'),
     dcc.Store(id='store_intermedio',data={}),
-    dcc.Store(id='store_adv',data={}),
-    dcc.Store(id='store_proc',data={}),
+    dcc.Store(id='store_adv',data=df_adv.to_dict()),
+    dcc.Store(id='store_proc',data=df_proc.to_dict()),
     html.Div(id='div_fantasma'),
 
     
@@ -61,6 +62,14 @@ def update_files(adv_data, procv_data):
     df_proc_aux = pd.DataFrame(procv_data)
 
     #preencher com codigo sql
+    conn = sqlite3.connect('sistema.db')
+    df_adv_aux.to_sql('advogados', conn, index=False, if_exists='replace')
+    conn.commit()
+    df_proc_aux.to_sql('processos', conn, index=False, if_exists='replace')
+    conn.commit()
+
+    conn.close()
+    return []
 
 
 if __name__ == '__main__':
