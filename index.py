@@ -69,6 +69,7 @@ def update_files(adv_data, procv_data):
     conn.commit()
 
     conn.close()
+    
     return []
 
 
