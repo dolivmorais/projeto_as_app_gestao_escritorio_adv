@@ -7,38 +7,37 @@ import pandas as pd
 
 from app import app
 
-
 # ========= Layout ========= #
 layout = dbc.Modal([
-    dbc.ModalHeader(dbc.ModalTitle("Adicione um Advogado")),
-    dbc.ModalBody([
-        dbc.Row([
-            dbc.Col([
-                dbc.Label("OAB"),
-                dbc.Input(id="adv_oab",placeholder="Apenas números, referente ao OAB" ,type="number")
-            ],sm=12,md=6),
-            dbc.Col([
-                dbc.Label("CPF"),
-                dbc.Input(id="adv_cpf",placeholder="Apenas números, referente ao CPF" ,type="number")
-            ],sm=12,md=6),
-        ]),
-        dbc.Row([
-            dbc.Col([
-                dbc.Label("Nome"),
-                dbc.Input(id="adv_nome",placeholder="Nome Completo do advogado" ,type="text")
+            dbc.ModalHeader(dbc.ModalTitle("Adicione Um Advogado")),
+            dbc.ModalBody([
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Label("OAB"),
+                        dbc.Input(id="adv_oab", placeholder="Apenas números, referente a OAB...", type="number")
+                    ], sm=12, md=6),
+                    dbc.Col([
+                        dbc.Label("CPF"),
+                        dbc.Input(id="adv_cpf", placeholder="Apenas números, CPF...", type="number")
+                    ], sm=12, md=6),
+                ]),
+                dbc.Row([
+                    dbc.Col([
+                        dbc.Label("Nome"),
+                        dbc.Input(id="adv_nome", placeholder="Nome completo do advogado...", type="text")
+                    ]),
+                ]),
+                html.H5(id='div_erro2')
             ]),
-        ]),
-        html.H5(id="div_erro2")        
-    ]),
-    dbc.ModalFooter([
-        dbc.Button("Cancelar", id="cancel_button_novo_advogado", color='danger'),
-        dbc.Button("Salvar", id="save_button_novo_advogado", color='success')
-    ])
-], id='modal_new_lawyer', size='lg', is_open=False)
-
+            dbc.ModalFooter([
+                dbc.Button("Cancelar", id="cancel_button_novo_advogado", color="danger"),
+                dbc.Button("Salvar", id="save_button_novo_advogado", color="success")
+            ])
+        ], id="modal_new_lawyer", size="lg", is_open=False)
 
 
 # ======= Callbacks ======== #
+# Callback para adicionar novos advogados
 @app.callback(
     Output('store_adv', 'data'),
     Output('div_erro2', 'children'),
@@ -49,38 +48,23 @@ layout = dbc.Modal([
     State('adv_oab', 'value'),
     State('adv_cpf', 'value')
 )
-def novo_adv(n_clicks, data_set, nome, oab, cpf):
+def novo_adv(n, dataset, nome, oab, cpf):
     erro = []
     style = {}
-
-    # Se store_adv for None, inicializa como lista vazia
-    if data_set is None:
-        data_set = []
-
-    df_adv = pd.DataFrame(data_set)
-
-    if n_clicks:
-        # Verifica se todos os campos foram preenchidos
+    if n:
         if None in [nome, oab, cpf]:
-            return data_set, ["Preencha todos os campos"], {'margin-bottom': '10px', 'color': 'red'}
-
-        # Verifica se 'OAB' e 'CPF' já existem na tabela
-        if 'OAB' in df_adv.columns and oab in df_adv['OAB'].values:
-            return data_set, ["OAB já cadastrado"], {'margin-bottom': '10px', 'color': 'red'}
+            return dataset, ["Todos dados são obrigatórios para registro!"], {'margin-bottom': '15px', 'color': 'red', 'text-shadow': '2px 2px 8px #000000'}
         
-        if 'CPF' in df_adv.columns and cpf in df_adv['CPF'].values:
-            return data_set, ["CPF já cadastrado"], {'margin-bottom': '10px', 'color': 'red'}
+        df_adv = pd.DataFrame(dataset)
 
-        # Adiciona novo advogado ao DataFrame
-        novo_advogado = pd.DataFrame([[nome, oab, cpf]], columns=['Nome', 'OAB', 'CPF'])
-        df_adv = pd.concat([df_adv, novo_advogado], ignore_index=True)
-
-        # Converte para dicionário no formato correto
-        dataset = df_adv.to_dict(orient='records')
-
-        # Depuração: printa os dados armazenados
-        print("Dados armazenados:", dataset)
-
-        return dataset, ["Cadastro realizado com sucesso"], {'margin-bottom': '10px', 'color': 'green'}
-
-    return data_set, erro, style
+        if oab in df_adv['OAB'].values:
+            return dataset, ["Número de OAB ja existe no sistema!"], {'margin-bottom': '15px', 'color': 'red', 'text-shadow': '2px 2px 8px #000000'}
+        elif cpf in df_adv['CPF'].values:
+            return dataset, ["Número de CPF ja existe no sistema!"], {'margin-bottom': '15px', 'color': 'red', 'text-shadow': '2px 2px 8px #000000'}
+        elif nome in df_adv['Advogado'].values:
+            return dataset, [f"Nome {nome} ja existe no sistema!"], {'margin-bottom': '15px', 'color': 'red', 'text-shadow': '2px 2px 8px #000000'}
+        
+        df_adv.loc[df_adv.shape[0]] = [nome, oab, cpf]
+        dataset = df_adv.to_dict()
+        return dataset, ["Cadastro realizado com sucesso!"], {'margin-bottom': '15px', 'color': 'green', 'text-shadow': '2px 2px 8px #000000'}
+    return dataset, erro, style
